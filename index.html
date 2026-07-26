@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نذاكر | بوابة البحث عن نتيجة الثانوية العامة 2026</title>
+    <link rel="icon" type="image/png" href="https://than.nezakr.net/nezakr2018/logo.png">
+    <meta name="theme-color" content="#0d6efd">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(-45deg, #0a0e27, #1a1a3e, #0d1b2a, #1b2f4a);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+            transition: background 0.5s ease;
+        }
+        body.pass { background: #0a0a0a !important; animation: none !important; }
+        body.fail {
+            background: linear-gradient(-45deg, #d0d0d0, #e8e8e8, #c0c0c0, #f0f0f0) !important;
+            background-size: 400% 400%;
+            animation: gradientBGFail 8s ease infinite;
+        }
+        @keyframes gradientBGFail {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            animation: floatParticle linear infinite;
+        }
+        @keyframes floatParticle {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+        }
+        .container-custom {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 900px;
+            background: rgba(255, 255, 255, 0.07);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 40px;
+            padding: 35px 30px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+            transition: all 0.5s ease;
+        }
+        .container-custom.pass {
+            background: rgba(0, 0, 0, 0.85) !important;
+            border: 2px solid #f1c40f !important;
+            box-shadow: 0 0 80px rgba(241, 196, 15, 0.4), inset 0 0 60px rgba(241, 196, 15, 0.05) !important;
+        }
+        .container-custom.fail {
+            background: rgba(255, 255, 255, 0.85) !important;
+            border: 1px solid rgba(160, 160, 160, 0.6) !important;
+            box-shadow: 0 0 50px rgba(160, 160, 160, 0.3) !important;
+        }
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .brand img { height: 55px; border-radius: 12px; background: rgba(255,255,255,0.05); padding: 4px; }
+        .brand h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #f9d976, #f39c12);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .brand small { color: #aab; font-size: 0.9rem; display: block; margin-top: -5px; -webkit-text-fill-color: #aab; }
+        .search-form .form-control, .search-form .form-select {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: #fff;
+            border-radius: 16px;
+            padding: 14px 18px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(4px);
+        }
+        .search-form .form-control:focus, .search-form .form-select:focus {
+            background: rgba(255,255,255,0.14);
+            border-color: #f1c40f;
+            box-shadow: 0 0 0 4px rgba(241,196,15,0.25);
+            color: #fff;
+        }
+        .search-form .form-control::placeholder { color: rgba(255,255,255,0.5); }
+        .search-form .form-label { font-weight: 600; color: #ddd; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+        .search-form .form-label i { color: #f1c40f; }
+        .btn-search {
+            background: linear-gradient(135deg, #f1c40f, #f39c12);
+            border: none;
+            padding: 14px 30px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #0a0e27;
+            width: 100%;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(241,196,15,0.3);
+        }
+        .btn-search:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(241,196,15,0.5);
+            background: linear-gradient(135deg, #f5d627, #e67e22);
+            color: #000;
+        }
+        .btn-search:active { transform: scale(0.97); }
+        .result-card {
+            display: none;
+            margin-top: 35px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 28px;
+            padding: 25px 20px;
+            border: 1px solid rgba(255,255,255,0.08);
+            backdrop-filter: blur(8px);
+            animation: fadeSlide 0.6s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .result-card.show { display: block; }
+        @keyframes fadeSlide {
+            0% { opacity: 0; transform: translateY(30px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        .result-header {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        .result-header .badge-pass {
+            background: #f1c40f;
+            color: #000;
+            padding: 6px 18px;
+            border-radius: 40px;
+            font-weight: 700;
+            box-shadow: 0 0 30px rgba(241,196,15,0.6);
+        }
+        .result-header .badge-fail {
+            background: #a0a0a0;
+            color: #fff;
+            padding: 6px 18px;
+            border-radius: 40px;
+            font-weight: 700;
+            box-shadow: 0 0 30px rgba(160,160,160,0.4);
+        }
+        .student-name { font-size: 1.5rem; font-weight: 700; color: #fff; }
+        .student-meta { color: #bbb; font-size: 0.9rem; }
+        .score-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: conic-gradient(#f1c40f var(--score), rgba(255,255,255,0.08) var(--score));
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 10px auto 20px;
+            position: relative;
+            box-shadow: 0 0 40px rgba(241,196,15,0.2);
+            transition: all 0.5s ease;
+        }
+        .score-circle.pass {
+            box-shadow: 0 0 80px rgba(241,196,15,0.8), 0 0 120px rgba(241,196,15,0.4);
+            border: 2px solid #f1c40f;
+        }
+        .score-circle.fail {
+            box-shadow: 0 0 50px rgba(160,160,160,0.3);
+            border: 2px solid #a0a0a0;
+            background: conic-gradient(#a0a0a0 var(--score), rgba(200,200,200,0.4) var(--score));
+        }
+        .score-circle .num { font-size: 2.4rem; font-weight: 800; color: #fff; line-height: 1; }
+        .score-circle .label { font-size: 0.75rem; color: #ccc; }
+        .subject-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 12px;
+            margin: 20px 0;
+        }
+        .subject-item {
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 12px 14px;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.2s;
+        }
+        .subject-item:hover { background: rgba(255,255,255,0.09); }
+        .subject-item .s-name { font-size: 0.9rem; color: #ddd; }
+        .subject-item .s-score { font-size: 1.1rem; font-weight: 700; color: #f1c40f; }
+        .progress-thin { height: 4px; background: rgba(255,255,255,0.1); border-radius: 4px; margin-top: 6px; }
+        .progress-thin .bar { height: 100%; border-radius: 4px; background: linear-gradient(90deg, #f1c40f, #f39c12); width: 0%; }
+        .non-core-tag { font-size: 0.6rem; background: rgba(255,255,255,0.08); padding: 1px 8px; border-radius: 20px; color: #888; margin-right: 6px; }
+        .footer-note {
+            margin-top: 25px;
+            text-align: center;
+            color: rgba(255,255,255,0.7);
+            font-size: 1rem;
+            border-top: 1px solid rgba(255,255,255,0.04);
+            padding-top: 20px;
+        }
+        .footer-note.pass { color: #f1c40f !important; text-shadow: 0 0 20px rgba(241,196,15,0.3); }
+        .footer-note.fail { color: #333 !important; }
+        .alert-custom {
+            background: rgba(231,76,60,0.15);
+            border: 1px solid #e74c3c;
+            color: #ff6b6b;
+            padding: 12px 18px;
+            border-radius: 16px;
+            margin-top: 15px;
+            display: none;
+            backdrop-filter: blur(4px);
+        }
+        .alert-custom.show { display: block; }
+        .confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+            overflow: hidden;
+        }
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            top: -10px;
+            animation: confettiFall linear forwards;
+        }
+        @keyframes confettiFall {
+            0% { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
+            100% { transform: translateY(110vh) rotate(720deg) scale(0.5); opacity: 0; }
+        }
+        .tear-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+            overflow: hidden;
+        }
+        .tear {
+            position: absolute;
+            width: 4px;
+            height: 15px;
+            background: rgba(80,80,80,0.3);
+            border-radius: 50%;
+            animation: tearFall linear forwards;
+        }
+        @keyframes tearFall {
+            0% { transform: translateY(-20px) scale(1); opacity: 0.4; }
+            100% { transform: translateY(110vh) scale(1.5); opacity: 0; }
+        }
+        .glow-pass { animation: glowPulse 1.2s ease-in-out infinite alternate; }
+        @keyframes glowPulse {
+            0% { text-shadow: 0 0 10px #f1c40f, 0 0 20px #f1c40f, 0 0 30px #f39c12; }
+            100% { text-shadow: 0 0 20px #f1c40f, 0 0 40px #f39c12, 0 0 60px #e67e22; }
+        }
+        .glow-fail { animation: glowPulseFail 2s ease-in-out infinite alternate; }
+        @keyframes glowPulseFail {
+            0% { text-shadow: 0 0 5px #aaa, 0 0 10px #888; }
+            100% { text-shadow: 0 0 15px #ccc, 0 0 25px #aaa; }
+        }
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+            color: #f1c40f;
+        }
+        .loading-spinner.show { display: block; }
+
+        .fail .student-name,
+        .fail .student-meta,
+        .fail .score-circle .num,
+        .fail .score-circle .label,
+        .fail #totalScore,
+        .fail #totalMax,
+        .fail #gradeText,
+        .fail .subject-item .s-name,
+        .fail .subject-item .s-score,
+        .fail .subject-item .non-core-tag,
+        .fail .footer-note,
+        .fail .brand small {
+            color: #111 !important;
+        }
+        .fail .score-circle {
+            background: conic-gradient(#888 var(--score), rgba(200,200,200,0.6) var(--score)) !important;
+        }
+        .fail .result-header {
+            border-bottom-color: rgba(0,0,0,0.1) !important;
+        }
+        .fail .subject-item {
+            border-color: rgba(0,0,0,0.05) !important;
+            background: rgba(0,0,0,0.03) !important;
+        }
+        .fail .subject-item:hover {
+            background: rgba(0,0,0,0.07) !important;
+        }
+        .fail .progress-thin {
+            background: rgba(0,0,0,0.1) !important;
+        }
+        .fail .progress-thin .bar {
+            background: #555 !important;
+        }
+        .fail .result-card {
+            border-color: rgba(0,0,0,0.08) !important;
+        }
+        .fail .brand h1 {
+            -webkit-text-fill-color: #222 !important;
+            background: none !important;
+        }
+
+        @media (max-width: 600px) {
+            .container-custom { padding: 20px 15px; }
+            .brand h1 { font-size: 1.5rem; }
+            .student-name { font-size: 1.2rem; }
+            .score-circle { width: 100px; height: 100px; }
+            .score-circle .num { font-size: 2rem; }
+            .subject-grid { grid-template-columns: 1fr 1fr; }
+        }
+        ::-webkit-scrollbar { width: 4px; background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #f1c40f; border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="particles" id="particles"></div>
+
+    <div class="container-custom" id="mainContainer">
+        <div class="brand">
+            <img src="https://than.nezakr.net/nezakr2018/logo.png" alt="نذاكر">
+            <div>
+                <h1>نذاكر <i class="fas fa-graduation-cap" style="-webkit-text-fill-color: #f1c40f; font-size: 1.8rem;"></i></h1>
+                <small>بوابة البحث عن نتيجة الثانوية العامة 2026</small>
+            </div>
+        </div>
+
+        <form id="searchForm" class="search-form">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <label class="form-label"><i class="fas fa-user"></i> الاسم رباعي</label>
+                    <input type="text" class="form-control" id="studentName" placeholder="مثال: احمد محمد ابراهيم حمدي" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label"><i class="fas fa-hashtag"></i> رقم الجلوس (7 أرقام، يبدأ بـ 2)</label>
+                    <input type="text" class="form-control" id="seatNumber" placeholder="مثال: 2034246" maxlength="7" inputmode="numeric" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label"><i class="fas fa-phone"></i> رقم الهاتف (+20)</label>
+                    <input type="tel" class="form-control" id="phoneNumber" placeholder="مثال: 01012345678" maxlength="11" inputmode="numeric" required>
+                    <small style="color:#aaa; font-size:0.7rem;">يجب أن يبدأ بـ 010، 011، 012، 015 (11 رقم)</small>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label"><i class="fas fa-layer-group"></i> الشعبة</label>
+                    <select class="form-select" id="major">
+                        <option value="علمي علوم">علمي علوم</option>
+                        <option value="علمي رياضة">علمي رياضة</option>
+                        <option value="أدبي">أدبي</option>
+                    </select>
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn-search"><i class="fas fa-search"></i> بحث عن النتيجة</button>
+                </div>
+            </div>
+        </form>
+
+        <div id="loadingSpinner" class="loading-spinner">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>
+            <p>جاري البحث في قاعدة البيانات السحابية...</p>
+        </div>
+
+        <div id="errorAlert" class="alert-custom"></div>
+
+        <div id="resultCard" class="result-card">
+            <div class="result-header">
+                <div>
+                    <div class="student-name" id="displayName">—</div>
+                    <div class="student-meta" id="displayMeta">رقم الجلوس: — | الشعبة: — | الهاتف: —</div>
+                </div>
+                <div id="statusBadge"><span class="badge-pass">ناجح ✅</span></div>
+            </div>
+
+            <div class="score-circle" id="scoreCircle" style="--score:0%">
+                <span class="num" id="totalPercent">0%</span>
+                <span class="label">النسبة المئوية</span>
+            </div>
+
+            <div style="text-align:center; margin-bottom:10px;">
+                <span style="font-size:1.1rem; color:#ddd;">المجموع الكلي (الأساسي): <strong id="totalScore">0</strong> / <span id="totalMax">320</span></span>
+                <span style="display:inline-block; margin-right:15px; background:rgba(255,255,255,0.05); padding:2px 12px; border-radius:40px; font-size:0.9rem; color:#aaa;" id="gradeText">ممتاز</span>
+            </div>
+
+            <div class="subject-grid" id="subjectsContainer"></div>
+
+            <div style="text-align:center; margin-top:10px;">
+                <button class="btn btn-outline-warning btn-sm" onclick="window.location.reload();" style="border-radius:40px; padding:6px 24px;"><i class="fas fa-rotate-left"></i> بحث جديد</button>
+            </div>
+        </div>
+
+        <div class="footer-note" id="footerNote">
+            <i class="fas fa-cloud" style="color: #f1c40f;"></i> تخزين سحابي — النتائج متاحة على جميع الأجهزة
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ======= تهيئة Firebase =======
+            const firebaseConfig = {
+                apiKey: "AIzaSyBhFDG0xTveefTEk-Mq1kpmcelP5CSF1Fc",
+                authDomain: "natiga-0.firebaseapp.com",
+                projectId: "natiga-0",
+                storageBucket: "natiga-0.firebasestorage.app",
+                messagingSenderId: "1022649191371",
+                appId: "1:1022649191371:web:1b9e37221d94e29adcc44e",
+                measurementId: "G-6QLXE9YE5Q"
+            };
+
+            let db = null;
+            let firebaseInitialized = false;
+
+            try {
+                if (typeof firebase !== 'undefined' && firebase.initializeApp) {
+                    firebase.initializeApp(firebaseConfig);
+                    db = firebase.database();
+                    firebaseInitialized = true;
+                    console.log("✅ Firebase initialized.");
+                } else {
+                    console.warn("⚠️ Firebase SDK not loaded. Using localStorage.");
+                }
+            } catch (e) {
+                console.error("❌ Firebase init error:", e);
+            }
+
+            // ======= خلفية جسيمات =======
+            const particlesContainer = document.getElementById('particles');
+            for (let i = 0; i < 40; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                const size = 3 + Math.random() * 8;
+                p.style.width = size + 'px';
+                p.style.height = size + 'px';
+                p.style.left = Math.random() * 100 + '%';
+                p.style.animationDuration = (10 + Math.random() * 25) + 's';
+                p.style.animationDelay = (Math.random() * 20) + 's';
+                p.style.opacity = 0.1 + Math.random() * 0.3;
+                particlesContainer.appendChild(p);
+            }
+
+            // ======= قائمة الأسماء المصرية =======
+            const EGYPTIAN_NAMES = new Set([
+                'انس', 'آدم', 'ادم', 'اياد', 'الياس', 'ميار', 'يارا', 'ريهام', 'شيماء', 'نورهان',
+                'ليلا',
+                'احمد', 'محمد', 'علي', 'حسن', 'حسين', 'خالد', 'محمود', 'ابراهيم', 'اسماعيل', 'اسحاق',
+                'يعقوب', 'يوسف', 'موسى', 'هارون', 'داود', 'سليمان', 'الياس', 'ادم', 'نوح', 'هود',
+                'صالح', 'شعيب', 'لوط', 'عمر', 'عثمان', 'عبدالله', 'عبدالرحمن', 'عبدالرؤوف', 'عبدالمجيد',
+                'عبداللطيف', 'عبدالحليم', 'عبدالحميد', 'عبدالستار', 'عبدالغفار', 'عبدالوهاب', 'عبدالقادر',
+                'عبدالرازق', 'عبدالصمد', 'عبدالمؤمن', 'عبدالرحيم', 'عبدالرشيد', 'عبدالحي', 'عبدالحق',
+                'عبدالقيوم', 'عبدالرقيب', 'عبدالملك', 'عبدالهادي', 'عبدالوارث', 'عبدالبديع', 'عبدالخالق',
+                'عبدالعزيز', 'عبدالكريم', 'عبدالمنعم', 'عبدالواحد', 'عبدالودود', 'عبدالوكيل', 'عبدالكافي',
+                'عبدالعظيم', 'عبدالغني', 'عبدالفتاح', 'عبدالقاهر', 'عبدالكبير', 'عبدالناصر', 'عبدالمهيمن',
+                'عبدالمعين', 'عبدالمغيث', 'عبدالمنان', 'طلعت', 'نبيل', 'سمير', 'جمال', 'كمال', 'فؤاد',
+                'شفيق', 'ايهاب', 'أيوب', 'باسم', 'بهاء', 'تامر', 'ثروت', 'جابر', 'جلال', 'جهاد',
+                'حازم', 'حامد', 'حسام', 'حمزة', 'خضير', 'رامي', 'رجب', 'رضا', 'رفعت', 'رمضان',
+                'سامي', 'سعيد', 'سليم', 'شعبان', 'شريف', 'صلاح', 'طارق', 'عاطف', 'عادل', 'عاصم',
+                'عباس', 'عزت', 'عصام', 'علاء', 'عماد', 'عمرو', 'عيسى', 'غريب', 'فتحي', 'فريد',
+                'فوزي', 'قصي', 'كامل', 'لطفي', 'ماجد', 'مازن', 'ماهر', 'مجدي', 'مختار', 'مروان',
+                'مسعد', 'مصطفى', 'معتز', 'معروف', 'مغيث', 'مطيع', 'مفيد', 'مقلد', 'مكرم', 'ملك',
+                'منتصر', 'منير', 'مهند', 'مؤمن', 'ميثم', 'نادر', 'ناصر', 'ناجي', 'نزيه', 'نصر',
+                'نعيم', 'هاني', 'هادي', 'همام', 'وائل', 'والي', 'ياسر', 'يزيد', 'يحيى', 'يونس',
+                'زكي', 'زياد', 'زين', 'سيف', 'شادي', 'صابر', 'ضياء', 'عمران', 'غانم', 'فارس',
+                'قاسم', 'لؤي', 'مبارك', 'مجدى', 'مليجى', 'نور', 'هشام', 'وحيد', 'وليد',
+                'محروس', 'حسني', 'بدوي', 'شنودة', 'مينا', 'كيرلس', 'تادرس', 'رفيق', 'نبيه', 'بطرس',
+                'أنطون', 'إسكندر', 'جرجس', 'ميخائيل', 'جبرائيل', 'روفائيل', 'حنا', 'متى', 'لوقا',
+                'مرقص', 'يوحنا', 'بولس', 'أندراوس', 'توما', 'فيلبس', 'برثولماوس', 'متياس', 'سمعان',
+                'يهوذا', 'إيليا', 'صموئيل', 'دانيال', 'حزقيال', 'إرميا', 'إشعياء', 'عاموس', 'هوشع',
+                'يوئيل', 'عوبديا', 'يونس', 'ميخا', 'ناحوم', 'حبقوق', 'صفنيا', 'حجاي', 'زكريا',
+                'ملاخي', 'أبيفانيوس', 'أثناسيوس', 'باخوميوس', 'ديديموس', 'إيرينيوس', 'يوسابيوس',
+                'كليمنت', 'أوريجانوس', 'باموا', 'بيشوي', 'مكاريوس', 'أنطونيوس', 'باولوس',
+                'ساويرس', 'ديسقورس', 'تيموثاوس', 'أبيسالوم', 'أخنوخ', 'أمين', 'أمير', 'أنس',
+                'بشير', 'جبر', 'حبيب', 'حمدي', 'رؤوف', 'شوقي', 'صبري', 'ظريف',
+                'نورالدين', 'نور الدين', 'بهاءالدين', 'بهاء الدين', 'جمالالدين', 'جمال الدين',
+                'حسامالدين', 'حسام الدين', 'شرفالدين', 'شرف الدين', 'عزالدين', 'عز الدين',
+                'فخرالدين', 'فخر الدين', 'قطبالدين', 'قطب الدين', 'نجمالدين', 'نجم الدين',
+                'ناصرالدين', 'ناصر الدين', 'صلاحالدين', 'صلاح الدين', 'سيفالدين', 'سيف الدين',
+                'ضياءالدين', 'ضياء الدين', 'علاءالدين', 'علاء الدين', 'عمادالدين', 'عماد الدين',
+                'محیيالدين', 'محیي الدين', 'مرتضى', 'رضوان',
+                'فاطمة', 'فاطمه', 'مريم', 'ميره', 'زينب', 'عائشه', 'عائشة', 'خديجه', 'خديجة', 'ساره',
+                'سارة', 'هاجر', 'رنا', 'مي', 'مروة', 'مروه', 'ندى', 'ندي', 'منى', 'مني',
+                'هنادي', 'هند', 'ريهام', 'شيماء', 'أسماء', 'اسماء', 'ايمان', 'إيمان', 'اميرة', 'اميره',
+                'دعاء', 'دعاء', 'منار', 'ميار', 'يارا', 'جنى', 'جنا', 'تسنيم', 'تسنيم', 'لينا',
+                'لين', 'راندا', 'راوية', 'رباب', 'رشا', 'زينة', 'زينه', 'سلمى', 'سلمي', 'سمية',
+                'سميه', 'شيرين', 'صفاء', 'صفا', 'ضحي', 'ضحى', 'عزة', 'عزه', 'غادة', 'غاده',
+                'فردوس', 'فريدة', 'فريده', 'قصواء', 'كرمة', 'كرمه', 'لمياء', 'لمياء', 'ماجدة', 'ماجده',
+                'مها', 'نهى', 'نهي', 'نورهان', 'نور', 'هبة', 'هبه', 'ياسمين', 'يسرا', 'الاء',
+                'الا', 'ايه', 'اية', 'بسمة', 'بسمه', 'جيهان', 'حنان', 'حنين', 'خلود', 'رغد',
+                'رغدة', 'رغده', 'رنيم', 'ريم', 'سجى', 'سجود', 'سماح', 'سميرة', 'سميره', 'شهد',
+                'صفية', 'صفيه', 'ضحكة', 'ضحكه', 'عهد', 'عهود', 'غنى', 'غني', 'فروخ', 'قسوة',
+                'لطيفة', 'لطيفه', 'لمى', 'لمي', 'منة', 'منه', 'نهلة', 'نهله', 'هدى', 'هدي',
+                'هيفاء', 'هيفا', 'وئام', 'وئام',
+                'مارية', 'حنة', 'راحيل', 'رفقة', 'ليئة', 'رقية', 'كلثوم', 'نرجس', 'سوسن',
+                'وردة', 'زهرة', 'نسمة', 'شذا', 'عبير', 'إلهام', 'نجوى', 'نهاد', 'رجاء',
+                'إخلاص', 'وفاء', 'نبيلة', 'كريمة', 'عفاف', 'سامية', 'جميلة', 'بهية', 'شادية',
+                'نادية', 'هالة', 'نوال', 'فوقية', 'زكية', 'آمنة', 'أمينة', 'سكينة', 'طيبة',
+                'مودة', 'رحمة', 'نيرة', 'منيرة', 'سحر', 'فايزة', 'كوثر', 'سلوى', 'نعمات',
+                'حكمت', 'نجاة', 'سعاد', 'رتيبة', 'نازك', 'نعمت', 'شفيقة', 'نبوية', 'حفيظة',
+                'عايدة', 'ناهد', 'رانية', 'إيناس', 'بسنت', 'داليا', 'إسراء', 'آية', 'هنا',
+                'جنة', 'تالا', 'ماريا', 'لورا', 'نينا', 'صوفيا', 'كاميليا', 'سيسيليا',
+                'أنجيلا', 'روزا', 'إيرين', 'شيري', 'ساندرا', 'مادلين', 'إلين', 'مارلين',
+                'مونيكا', 'فيرونيكا', 'باتريشيا', 'جوليا', 'ناتالي', 'كريستينا', 'آنا',
+                'ماري', 'لويز', 'إليزابيث', 'كاثرين', 'مارغريت', 'هيلين', 'جوان', 'ماريان',
+                'نانسي', 'كارول', 'ليندا', 'كلير', 'روز', 'آن', 'جين', 'إلين', 'دوريس',
+                'إيما', 'غريس', 'هازل', 'إيريس', 'جويل', 'كايت', 'ليلى', 'مايا', 'ناديا',
+                'أوليفيا', 'باولا', 'كوين', 'رايتشل', 'سامانثا', 'تينا', 'أوما', 'فيرا',
+                'ويندي', 'كسينيا', 'زوي', 'إيفا', 'إيزابيل', 'إيلا', 'كلارا', 'أليسيا',
+                'كارولين', 'ريبيكا', 'صوفي'
+            ]);
+
+            // ======= دوال مساعدة =======
+            function normalizeName(name) {
+                return name
+                    .replace(/[أإآ]/g, 'ا')
+                    .replace(/ة/g, 'ه')
+                    .replace(/ى/g, 'ي')
+                    .replace(/ئ/g, 'ي')
+                    .replace(/ؤ/g, 'و')
+                    .replace(/ء/g, '')
+                    .trim();
+            }
+
+            function validateName(fullName) {
+                const parts = fullName.trim().split(/\s+/).filter(p => p.length > 0);
+                if (parts.length !== 4) {
+                    return { valid: false, msg: '⚠️ يجب أن يتكون الاسم من أربعة أجزاء بالضبط.' };
+                }
+                const normParts = parts.map(p => normalizeName(p));
+                if (normParts.some(p => p.length === 0)) {
+                    return { valid: false, msg: '⚠️ الاسم يحتوي على أجزاء غير صالحة.' };
+                }
+                for (let i = 0; i < normParts.length; i++) {
+                    if (!EGYPTIAN_NAMES.has(normParts[i])) {
+                        return { valid: false, msg: '⚠️ الاسم غير صحيح.' };
+                    }
+                }
+                const freq = {};
+                for (const p of normParts) { freq[p] = (freq[p] || 0) + 1; }
+                for (const [name, count] of Object.entries(freq)) {
+                    if (count > 2) {
+                        return { valid: false, msg: '⚠️ لا يمكن تكرار نفس الاسم أكثر من مرتين.' };
+                    }
+                }
+                return { valid: true, normParts };
+            }
+
+            function validatePhone(phone) {
+                const pattern = /^(010|011|012|015)\d{8}$/;
+                return pattern.test(phone);
+            }
+
+            function hashKey(seat, phone) {
+                const str = seat + '|' + phone;
+                let hash = 0;
+                for (let i = 0; i < str.length; i++) {
+                    const char = str.charCodeAt(i);
+                    hash = ((hash << 5) - hash) + char;
+                    hash = hash & hash;
+                }
+                return Math.abs(hash);
+            }
+
+            function mulberry32(a) {
+                return function() {
+                    a |= 0;
+                    a = a + 0x6D2B79F5 | 0;
+                    let t = Math.imul(a ^ a >>> 15, 1 | a);
+                    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+                    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+                };
+            }
+
+            const MAJOR_SUBJECTS = {
+                'علمي علوم': ['اللغة العربية', 'اللغة الأجنبية الأولى', 'الفيزياء', 'الكيمياء', 'الأحياء'],
+                'علمي رياضة': ['اللغة العربية', 'اللغة الأجنبية الأولى', 'الرياضيات', 'الفيزياء', 'الكيمياء'],
+                'أدبي': ['اللغة العربية', 'اللغة الأجنبية الأولى', 'التاريخ', 'الجغرافيا', 'الإحصاء']
+            };
+
+            const SUBJECT_MAX = {
+                'اللغة العربية': 80,
+                'اللغة الأجنبية الأولى': 60,
+                'الفيزياء': 60,
+                'الكيمياء': 60,
+                'الأحياء': 60,
+                'الرياضيات': 60,
+                'التاريخ': 60,
+                'الجغرافيا': 60,
+                'الإحصاء': 60
+            };
+
+            const NON_CORE_SUBJECTS = [
+                { name: 'التربية الدينية', max: 25 },
+                { name: 'التربية الوطنية', max: 25 },
+                { name: 'اللغة الأجنبية الثانية', max: 25 }
+            ];
+
+            // ======= توليد نتيجة (جميعها بين 60% و 90%) =======
+            function generateFixedResult(name, seat, phone, major) {
+                const seed = hashKey(seat, phone);
+                const rand = mulberry32(seed);
+
+                const coreNames = MAJOR_SUBJECTS[major] || MAJOR_SUBJECTS['علمي علوم'];
+                const coreTotalMax = coreNames.reduce((sum, n) => sum + SUBJECT_MAX[n], 0);
+
+                // النسبة الإجمالية بين 60% و 90%
+                const targetPercent = 60 + rand() * 30; // 60.00 - 90.00
+
+                // توليد درجات المواد الأساسية
+                const coreScores = coreNames.map(subName => {
+                    const max = SUBJECT_MAX[subName];
+                    // انحراف عشوائي ± 15% من النسبة المستهدفة
+                    let pct = targetPercent + (rand() * 30 - 15);
+                    pct = Math.min(95, Math.max(50, pct));
+                    const score = Math.round((pct / 100) * max * 100) / 100;
+                    return { name: subName, max: max, score: Math.min(max, Math.max(0, score)) };
+                });
+
+                // إعادة حساب النسبة الفعلية
+                const actualTotal = coreScores.reduce((sum, s) => sum + s.score, 0);
+                const actualPercent = Math.round((actualTotal / coreTotalMax) * 100 * 100) / 100;
+
+                // المواد غير المضافة (نجاح عشوائي بين 70% و 95%)
+                const nonCoreScores = NON_CORE_SUBJECTS.map(sub => {
+                    const pct = 70 + rand() * 25;
+                    const score = Math.round((pct / 100) * sub.max * 100) / 100;
+                    return {
+                        name: sub.name,
+                        max: sub.max,
+                        score: Math.min(sub.max, Math.max(0, score))
+                    };
+                });
+
+                const allSubjects = [...coreScores, ...nonCoreScores];
+
+                let grade = 'ممتاز';
+                if (actualPercent < 50) grade = 'ضعيف';
+                else if (actualPercent < 65) grade = 'مقبول';
+                else if (actualPercent < 75) grade = 'جيد';
+                else if (actualPercent < 85) grade = 'جيد جداً';
+                else grade = 'ممتاز';
+
+                return {
+                    name: name.trim(),
+                    seat: seat,
+                    phone: phone,
+                    major: major,
+                    total: Math.round(actualTotal * 100) / 100,
+                    max: coreTotalMax,
+                    percent: actualPercent,
+                    grade: grade,
+                    subjects: allSubjects,
+                    coreSubjects: coreScores,
+                    status: 'pass', // دائماً ناجح
+                    timestamp: Date.now()
+                };
+            }
+
+            // ======= دوال التخزين =======
+            function saveResultToCloud(key, data) {
+                if (!firebaseInitialized || !db) {
+                    saveToLocalStorage(key, data);
+                    return Promise.resolve();
+                }
+                return db.ref('results/' + key).set(data)
+                    .then(() => { console.log(`✅ Result ${key} saved to cloud.`); })
+                    .catch(err => {
+                        console.error('❌ Cloud save error:', err);
+                        saveToLocalStorage(key, data);
+                    });
+            }
+
+            function getAllResultsFromCloud() {
+                return new Promise((resolve) => {
+                    if (!firebaseInitialized || !db) {
+                        resolve(getAllFromLocalStorage());
+                        return;
+                    }
+                    db.ref('results').once('value')
+                        .then(snapshot => {
+                            const val = snapshot.val();
+                            resolve(val || {});
+                        })
+                        .catch(err => {
+                            console.error('❌ Cloud read all error:', err);
+                            resolve(getAllFromLocalStorage());
+                        });
+                });
+            }
+
+            function saveToLocalStorage(key, data) {
+                try {
+                    const all = JSON.parse(localStorage.getItem('nzakr_backup') || '{}');
+                    all[key] = data;
+                    localStorage.setItem('nzakr_backup', JSON.stringify(all));
+                } catch (e) { console.error('LocalStorage save error:', e); }
+            }
+
+            function getAllFromLocalStorage() {
+                try {
+                    return JSON.parse(localStorage.getItem('nzakr_backup') || '{}');
+                } catch (e) { return {}; }
+            }
+
+            // ======= مؤثرات =======
+            function launchConfetti() {
+                const container = document.createElement('div');
+                container.className = 'confetti-container';
+                document.body.appendChild(container);
+                const colors = ['#f1c40f', '#f39c12', '#d4af37', '#e6b800', '#ffd700', '#b8860b', '#daa520'];
+                for (let i = 0; i < 200; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    const size = 6 + Math.random() * 10;
+                    confetti.style.width = size + 'px';
+                    confetti.style.height = size * 0.6 + 'px';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                    confetti.style.animationDuration = (2 + Math.random() * 3) + 's';
+                    confetti.style.animationDelay = (Math.random() * 2) + 's';
+                    container.appendChild(confetti);
+                }
+                setTimeout(() => container.remove(), 5000);
+            }
+
+            function launchTears() {
+                const container = document.createElement('div');
+                container.className = 'tear-container';
+                document.body.appendChild(container);
+                for (let i = 0; i < 80; i++) {
+                    const tear = document.createElement('div');
+                    tear.className = 'tear';
+                    tear.style.left = Math.random() * 100 + '%';
+                    tear.style.width = (2 + Math.random() * 4) + 'px';
+                    tear.style.height = (8 + Math.random() * 15) + 'px';
+                    tear.style.animationDuration = (3 + Math.random() * 4) + 's';
+                    tear.style.animationDelay = (Math.random() * 3) + 's';
+                    container.appendChild(tear);
+                }
+                setTimeout(() => container.remove(), 6000);
+            }
+
+            // ======= دوال العرض =======
+            function displayResult(data) {
+                const card = document.getElementById('resultCard');
+                card.classList.add('show');
+                document.getElementById('errorAlert').classList.remove('show');
+
+                document.getElementById('displayName').textContent = data.name;
+                document.getElementById('displayMeta').textContent = `رقم الجلوس: ${data.seat} | الشعبة: ${data.major} | الهاتف: +20${data.phone}`;
+
+                const badge = document.getElementById('statusBadge');
+                const circle = document.getElementById('scoreCircle');
+                const container = document.getElementById('mainContainer');
+                const body = document.body;
+                const footer = document.getElementById('footerNote');
+
+                body.classList.remove('pass', 'fail');
+                container.classList.remove('pass', 'fail');
+                circle.classList.remove('pass', 'fail');
+                footer.classList.remove('pass', 'fail');
+
+                // جميع النتائج ناجحة
+                badge.innerHTML = `<span class="badge-pass glow-pass">ناجح ✅ 🎉</span>`;
+                circle.classList.add('pass');
+                container.classList.add('pass');
+                body.classList.add('pass');
+                footer.classList.add('pass');
+                launchConfetti();
+                document.querySelector('.brand h1').classList.add('glow-pass');
+                footer.innerHTML = `<i class="fas fa-cloud" style="color: #f1c40f;"></i> تخزين سحابي — النتائج متاحة على جميع الأجهزة <span style="color: #f1c40f; font-weight: 700;">✨🏆</span>`;
+
+                const percentNum = data.percent;
+                circle.style.setProperty('--score', percentNum + '%');
+                document.getElementById('totalPercent').textContent = percentNum.toFixed(2) + '%';
+
+                document.getElementById('totalScore').textContent = data.total.toFixed(2);
+                document.getElementById('totalMax').textContent = data.max;
+                document.getElementById('gradeText').textContent = data.grade;
+
+                const containerSubjects = document.getElementById('subjectsContainer');
+                containerSubjects.innerHTML = '';
+                const coreNames = MAJOR_SUBJECTS[data.major] || MAJOR_SUBJECTS['علمي علوم'];
+
+                data.subjects.forEach(sub => {
+                    const isCore = coreNames.includes(sub.name);
+                    const pct = Math.round((sub.score / sub.max) * 100 * 10) / 10;
+                    const div = document.createElement('div');
+                    div.className = 'subject-item';
+                    div.innerHTML = `
+                        <div class="s-name">${sub.name} ${!isCore ? '<span class="non-core-tag">غير مضاف</span>' : ''}</div>
+                        <div class="s-score">${sub.score.toFixed(1)} <small style="color:#888;font-size:0.7rem;">/ ${sub.max}</small></div>
+                        <div class="progress-thin"><div class="bar" style="width:${Math.min(100, pct)}%;"></div></div>
+                    `;
+                    containerSubjects.appendChild(div);
+                });
+            }
+
+            function showError(msg) {
+                const alert = document.getElementById('errorAlert');
+                alert.textContent = msg;
+                alert.classList.add('show');
+                document.getElementById('resultCard').classList.remove('show');
+                document.body.classList.remove('pass', 'fail');
+                document.getElementById('mainContainer').classList.remove('pass', 'fail');
+                document.querySelector('.brand h1').classList.remove('glow-pass');
+                document.querySelectorAll('.confetti-container, .tear-container').forEach(el => el.remove());
+            }
+
+            function showLoading(show) {
+                document.getElementById('loadingSpinner').classList.toggle('show', show);
+            }
+
+            // ======= معالجة البحث =======
+            const form = document.getElementById('searchForm');
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+
+                const nameInput = document.getElementById('studentName');
+                const seatInput = document.getElementById('seatNumber');
+                const phoneInput = document.getElementById('phoneNumber');
+                const majorSelect = document.getElementById('major');
+
+                const rawName = nameInput.value.trim();
+                const seat = seatInput.value.trim();
+                const phone = phoneInput.value.trim();
+                const major = majorSelect.value;
+
+                const validation = validateName(rawName);
+                if (!validation.valid) {
+                    showError(validation.msg);
+                    return;
+                }
+                const normName = validation.normParts.join(' ');
+
+                if (!/^2\d{6}$/.test(seat)) {
+                    showError('⚠️ رقم الجلوس يجب أن يكون 7 أرقام ويبدأ بالرقم 2.');
+                    return;
+                }
+
+                if (!validatePhone(phone)) {
+                    showError('⚠️ رقم الهاتف يجب أن يبدأ بـ 010، 011، 012، 015 ويتكون من 11 رقم.');
+                    return;
+                }
+
+                showLoading(true);
+
+                try {
+                    const key = `${normName}|${seat}|${phone}`;
+                    const allResults = await getAllResultsFromCloud();
+
+                    if (allResults[key]) {
+                        displayResult(allResults[key]);
+                        showLoading(false);
+                        return;
+                    }
+
+                    let foundConflict = false;
+                    let conflictMsg = '';
+                    for (const [k, v] of Object.entries(allResults)) {
+                        const existingNorm = v.normalizedName || v.name;
+                        if (existingNorm === normName) {
+                            if (v.seat !== seat || v.phone !== phone) {
+                                foundConflict = true;
+                                conflictMsg = `⚠️ هذا الاسم مسجل بالفعل برقم جلوس (${v.seat}) وهاتف (+20${v.phone}). لا يمكن تسجيله ببيانات مختلفة.`;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (foundConflict) {
+                        showError(conflictMsg);
+                        showLoading(false);
+                        return;
+                    }
+
+                    const newResult = generateFixedResult(rawName, seat, phone, major);
+                    newResult.normalizedName = normName;
+                    await saveResultToCloud(key, newResult);
+                    displayResult(newResult);
+
+                } catch (err) {
+                    console.error('Search error:', err);
+                    showError('⚠️ حدث خطأ أثناء البحث. حاول مرة أخرى.');
+                } finally {
+                    showLoading(false);
+                }
+            });
+
+        })();
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
