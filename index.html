@@ -495,7 +495,19 @@
                 particlesContainer.appendChild(p);
             }
 
-            // ======= تم حذف قائمة الأسماء بالكامل =======
+            // ======= نظام الحماية (قفل الجهاز على أول بحث ناجح) =======
+            const LOCK_KEY = 'nzakr_device_lock';
+
+            function getLockedData() {
+                try {
+                    const raw = localStorage.getItem(LOCK_KEY);
+                    return raw ? JSON.parse(raw) : null;
+                } catch { return null; }
+            }
+
+            function setLockedData(name, seat, phone) {
+                localStorage.setItem(LOCK_KEY, JSON.stringify({ name, seat, phone }));
+            }
 
             // ======= دوال مساعدة =======
             function normalizeName(name) {
@@ -518,7 +530,6 @@
                 if (normParts.some(p => p.length === 0)) {
                     return { valid: false, msg: '⚠️ الاسم يحتوي على أجزاء غير صالحة.' };
                 }
-                // التحقق من عدم تكرار الاسم أكثر من مرتين
                 const freq = {};
                 for (const p of normParts) { freq[p] = (freq[p] || 0) + 1; }
                 for (const [name, count] of Object.entries(freq)) {
@@ -635,7 +646,7 @@
                 };
             }
 
-            // ======= دوال التخزين =======
+            // ======= دوال التخزين السحابي =======
             function saveResultToCloud(key, data) {
                 if (!firebaseInitialized || !db) {
                     saveToLocalStorage(key, data);
@@ -790,7 +801,7 @@
                 document.getElementById('loadingSpinner').classList.toggle('show', show);
             }
 
-            // ======= معالجة البحث =======
+            // ======= معالجة البحث (مع نظام الحماية) =======
             const form = document.getElementById('searchForm');
             form.addEventListener('submit', async function(e) {
                 e.preventDefault();
@@ -805,6 +816,7 @@
                 const phone = phoneInput.value.trim();
                 const major = majorSelect.value;
 
+                // 1. التحقق من الاسم
                 const validation = validateName(rawName);
                 if (!validation.valid) {
                     showError(validation.msg);
@@ -812,14 +824,28 @@
                 }
                 const normName = validation.normParts.join(' ');
 
+                // 2. التحقق من رقم الجلوس
                 if (!/^2\d{6}$/.test(seat)) {
                     showError('⚠️ رقم الجلوس يجب أن يكون 7 أرقام ويبدأ بالرقم 2.');
                     return;
                 }
 
+                // 3. التحقق من رقم الهاتف
                 if (!validatePhone(phone)) {
                     showError('⚠️ رقم الهاتف يجب أن يبدأ بـ 010، 011، 012، 015 ويتكون من 11 رقم.');
                     return;
+                }
+
+                // ======= نظام الحماية: التحقق من القفل =======
+                const locked = getLockedData();
+                const currentKey = `${normName}|${seat}|${phone}`;
+
+                if (locked) {
+                    const lockedKey = `${locked.name}|${locked.seat}|${locked.phone}`;
+                    if (lockedKey !== currentKey) {
+                        showError(`⚠️ هذا الجهاز مقيد بالبحث عن الطالب (${locked.name}) فقط. لا يمكن البحث عن طالب آخر.`);
+                        return;
+                    }
                 }
 
                 showLoading(true);
@@ -830,6 +856,10 @@
 
                     if (allResults[key]) {
                         displayResult(allResults[key]);
+                        // في حال كان البحث ناجحاً ولم يكن هناك قفل، نضع القفل (أول مرة)
+                        if (!locked) {
+                            setLockedData(normName, seat, phone);
+                        }
                         showLoading(false);
                         return;
                     }
@@ -856,6 +886,12 @@
                     const newResult = generateFixedResult(rawName, seat, phone, major);
                     newResult.normalizedName = normName;
                     await saveResultToCloud(key, newResult);
+
+                    // حفظ القفل (أول بحث ناجح)
+                    if (!locked) {
+                        setLockedData(normName, seat, phone);
+                    }
+
                     displayResult(newResult);
 
                 } catch (err) {
